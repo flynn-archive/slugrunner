@@ -7,7 +7,12 @@ export HOME=/app
 mkdir -p $HOME
 
 if [[ $SLUG_URL ]]; then
-	curl -s "$SLUG_URL" | tar -xzC $HOME
+    if [[ "$SLUG_URL" =~ "http://" ]] || [[ "$SLUG_URL" =~ "https://" ]] || [[ "$SLUG_URL" =~ "ftp://" ]]
+    then
+        curl -s "$SLUG_URL" | tar -xzC $HOME
+    else
+        tar -C $HOME -xvf $SLUG_URL
+    fi
 	unset SLUG_URL
 else
 	cat | tar -xzC $HOME
