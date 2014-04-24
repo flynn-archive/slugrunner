@@ -45,21 +45,26 @@ esac
 
 ## Use sdutil to register with service discovery
 
+runner="bash -c"
+
+if [[ $SD_PG_URL && $FLYNN_POSTGRES && $PGDATABASE && $PGPASSWORD && $PGUSER ]]; then
+	runner="sdutil expose -d POSTGRES_ADDR:$FLYNN_POSTGRES $runner"
+	dbenv="DATABASE_URL=postgres://\$PGUSER:\$PGPASSWORD@\$POSTGRES_ADDR/\$PGDATABASE "
+fi
+
 if [[ $SD_NAME && $PORT ]]; then
 	if [[ $SD_HOST ]]; then
-		runner="sdutil exec -h $SD_HOST -s $SD_NAME:$PORT bash -c"
+		runner="sdutil exec -h $SD_HOST -s $SD_NAME:$PORT $runner"
 		unset SD_HOST
 	else
-		runner="sdutil exec -s $SD_NAME:$PORT bash -c"
+		runner="sdutil exec -s $SD_NAME:$PORT $runner"
 	fi
 	unset SD_NAME
 elif [[ $SD_ARGS ]]; then
-	runner="sdutil $SD_ARGS bash -c"
+	runner="sdutil $SD_ARGS $runner"
 	unset SD_ARGS
-else
-	runner="bash -c"
 fi
 
 ## Run!
 
-$runner "$command"
+$runner "$dbenv$command"
